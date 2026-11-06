@@ -1,0 +1,881 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>InstaChef v1.0 Release Notes</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@500;600;700&family=Nunito+Sans:opsz,wght@6..12,400;6..12,600;6..12,700&family=JetBrains+Mono:wght@500&display=swap">
+<style>
+/* Layout: one reading column; a "before release" band (bypasses + client needs) above eight numbered module sections, with a sticky chip nav. */
+:root {
+  --bg: #FFFFFF;
+  --surface: #F7F5F3;
+  --fg: #1D1F34;
+  --muted: #5E6070;
+  --line: #E6E2DE;
+  --accent: #D24D29;
+  --accent-soft: #FBE9E3;
+  --green: #4F7029;
+  --green-soft: #EAF1E1;
+  --amber: #8A5200;
+  --amber-soft: #FFF3DC;
+  --amber-line: #F0D49B;
+  --blue: #2A549A;
+  --blue-soft: #E8EFFA;
+  --blue-line: #BCD0EF;
+  --font-display: "Sora", "Segoe UI", system-ui, sans-serif;
+  --font-body: "Nunito Sans", "Segoe UI", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #121316; --surface: #1B1C21; --fg: #EDEBE8; --muted: #A5A4AC; --line: #2D2E34;
+    --accent: #F07A55; --accent-soft: #3A2119; --green: #A3C873; --green-soft: #1E2916;
+    --amber: #F2B55A; --amber-soft: #2E230F; --amber-line: #5A4319;
+    --blue: #93B4EE; --blue-soft: #15213A; --blue-line: #2D436B;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #121316; --surface: #1B1C21; --fg: #EDEBE8; --muted: #A5A4AC; --line: #2D2E34;
+  --accent: #F07A55; --accent-soft: #3A2119; --green: #A3C873; --green-soft: #1E2916;
+  --amber: #F2B55A; --amber-soft: #2E230F; --amber-line: #5A4319;
+  --blue: #93B4EE; --blue-soft: #15213A; --blue-line: #2D436B;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; scroll-padding-top: calc(env(safe-area-inset-top, 0px) + 64px); }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+body {
+  background: var(--bg); color: var(--fg);
+  font-family: var(--font-body); font-size: 16px; line-height: 1.6;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 0 64px;
+}
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--bg); }
+.wrap { max-width: 880px; margin: 0 auto; }
+h1, h2, h3, h4 { font-family: var(--font-display); text-wrap: balance; margin: 0; line-height: 1.25; }
+a { color: var(--accent); }
+a:focus-visible, button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 4px; }
+code, .mono { font-family: var(--font-mono); font-size: 0.86em; }
+code { background: var(--surface); border: 1px solid var(--line); padding: 1px 6px; border-radius: 5px; }
+
+/* Masthead */
+.mast { padding-block: 48px 28px; display: grid; gap: 20px; border-bottom: 1px solid var(--line); }
+.brand { display: flex; align-items: center; gap: 10px; font-family: var(--font-display); font-weight: 600; color: var(--accent); letter-spacing: 0.02em; }
+.brand-mark { width: 28px; height: 28px; border-radius: 8px; background: var(--accent); display: grid; place-items: center; }
+.brand-mark svg { width: 16px; height: 16px; }
+.mast h1 { font-size: clamp(2rem, 5vw, 2.9rem); font-weight: 700; letter-spacing: -0.02em; }
+.mast .lede { margin: 0; color: var(--muted); max-width: 62ch; font-size: 1.05rem; }
+.meta { display: flex; flex-wrap: wrap; gap: 8px 24px; margin: 0; padding: 0; list-style: none; font-size: 0.92rem; }
+.meta li { display: flex; gap: 6px; }
+.meta dt, .meta .k { color: var(--muted); }
+.meta .v { font-weight: 700; }
+
+.stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+.stat { border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; display: grid; gap: 2px; text-decoration: none; color: inherit; }
+.stat:hover { border-color: var(--muted); }
+.stat .n { font-family: var(--font-display); font-size: 1.7rem; font-weight: 700; font-variant-numeric: tabular-nums; line-height: 1.1; }
+.stat .l { color: var(--muted); font-size: 0.9rem; }
+.stat.bypass .n { color: var(--amber); }
+.stat.client .n { color: var(--blue); }
+@media (max-width: 520px) { .stats { grid-template-columns: 1fr; } .stat { grid-template-columns: auto 1fr; align-items: baseline; gap: 10px; } }
+
+/* Sticky nav */
+.nav { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: var(--bg); border-bottom: 1px solid var(--line); margin-inline: calc(-1 * max(16px, env(safe-area-inset-left, 0px))); padding: 10px max(16px, env(safe-area-inset-left, 0px)); }
+.nav-in { max-width: 880px; margin: 0 auto; display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; }
+.nav-in::-webkit-scrollbar { display: none; }
+.nav a { flex: none; text-decoration: none; color: var(--fg); font-size: 0.86rem; font-weight: 600; padding: 6px 12px; border-radius: 999px; border: 1px solid var(--line); white-space: nowrap; }
+.nav a:hover { border-color: var(--accent); color: var(--accent); }
+.nav a.hl-b { background: var(--amber-soft); border-color: var(--amber-line); color: var(--amber); }
+.nav a.hl-c { background: var(--blue-soft); border-color: var(--blue-line); color: var(--blue); }
+
+/* Section headings */
+.part { padding-top: 44px; display: grid; gap: 18px; }
+.eyebrow { font-size: 0.75rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); }
+.part > header { display: grid; gap: 6px; }
+.part > header h2 { font-size: 1.6rem; font-weight: 700; letter-spacing: -0.01em; }
+.part > header p { margin: 0; color: var(--muted); max-width: 66ch; }
+
+/* Bypass + dependency registers */
+.register { display: grid; gap: 12px; margin: 0; padding: 0; list-style: none; }
+.reg { border: 1px solid var(--line); border-left: 4px solid var(--amber); border-radius: 10px; padding: 16px 18px; display: grid; gap: 8px; background: var(--bg); }
+.reg.client { border-left-color: var(--blue); }
+.reg.internal { border-left-color: var(--green); }
+.reg-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 12px; }
+.reg-id { font-family: var(--font-mono); font-size: 0.8rem; font-weight: 500; padding: 2px 8px; border-radius: 6px; background: var(--amber-soft); color: var(--amber); }
+.reg.client .reg-id { background: var(--blue-soft); color: var(--blue); }
+.reg.internal .reg-id { background: var(--green-soft); color: var(--green); }
+.reg h3 { font-size: 1.05rem; font-weight: 600; }
+.reg p { margin: 0; }
+.reg ul { margin: 0; padding-left: 20px; display: grid; gap: 4px; }
+.reg .where { font-size: 0.9rem; color: var(--muted); }
+.reg .where b { color: var(--fg); font-weight: 600; }
+.status { margin-left: auto; font-size: 0.78rem; font-weight: 700; padding: 2px 10px; border-radius: 999px; border: 1px solid var(--line); color: var(--muted); white-space: nowrap; }
+.status.on { color: var(--amber); border-color: var(--amber-line); }
+.status.next { color: var(--muted); }
+.status.need { color: var(--blue); border-color: var(--blue-line); }
+
+.panel { border: 1px solid var(--line); border-radius: 12px; padding: 18px 20px; background: var(--surface); display: grid; gap: 10px; }
+.panel h3 { font-size: 1rem; font-weight: 600; }
+.panel ul { margin: 0; padding-left: 20px; display: grid; gap: 4px; }
+.two { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+@media (max-width: 680px) { .two { grid-template-columns: 1fr; } }
+
+/* Modules */
+.module { padding-top: 52px; display: grid; gap: 18px; counter-reset: feat; }
+.mod-head { display: grid; gap: 6px; padding-bottom: 14px; border-bottom: 2px solid var(--fg); }
+.mod-head .eyebrow { color: var(--accent); }
+.mod-head h2 { font-size: clamp(1.5rem, 3.5vw, 1.9rem); font-weight: 700; letter-spacing: -0.01em; }
+.mod-head p { margin: 0; color: var(--muted); max-width: 66ch; }
+.side { font-family: var(--font-display); font-size: 0.8rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); padding-top: 6px; display: flex; align-items: center; gap: 10px; }
+.side::after { content: ""; flex: 1; height: 1px; background: var(--line); }
+.feats { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+.feat { counter-increment: feat; display: grid; grid-template-columns: 2.4rem minmax(0, 1fr); gap: 0 8px; padding: 12px 0; border-bottom: 1px solid var(--line); }
+.feat:last-child { border-bottom: 0; }
+.feat::before { content: counter(feat) ")"; font-family: var(--font-display); font-weight: 600; color: var(--accent); font-variant-numeric: tabular-nums; padding-top: 1px; }
+.feat > * { grid-column: 2; }
+.feat h3 { font-size: 1.05rem; font-weight: 600; margin-bottom: 4px; }
+.feat ul { margin: 0; padding-left: 18px; display: grid; gap: 3px; }
+.feat ul ul { margin-top: 3px; }
+.steps { list-style: none; margin: 4px 0 0; padding: 0; display: grid; gap: 8px; counter-reset: step; }
+.steps > li { counter-increment: step; display: grid; grid-template-columns: 1.8rem minmax(0, 1fr); gap: 0 4px; }
+.steps > li::before { content: counter(step, lower-alpha) ")"; color: var(--muted); font-weight: 700; }
+.steps > li > * { grid-column: 2; }
+.steps b { font-weight: 700; }
+
+.note { margin-top: 8px; border-radius: 8px; padding: 10px 12px; font-size: 0.94rem; display: grid; gap: 2px; border: 1px solid var(--amber-line); background: var(--amber-soft); }
+.note .tag { font-size: 0.72rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--amber); display: flex; gap: 8px; align-items: center; }
+.note.client { border-color: var(--blue-line); background: var(--blue-soft); }
+.note.client .tag { color: var(--blue); }
+.note.info { border-color: var(--line); background: var(--surface); }
+.note.info .tag { color: var(--muted); }
+.note a { font-family: var(--font-mono); font-size: 0.78rem; text-decoration: none; }
+.mod-note { margin-top: 0; }
+
+footer { margin-top: 56px; padding-top: 20px; border-top: 1px solid var(--line); color: var(--muted); font-size: 0.88rem; }
+body { margin: 0; }
+img { max-width: 100%; }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header class="mast">
+    <div class="brand">
+      <span class="brand-mark" aria-hidden="true"><svg viewBox="0 0 16 16" fill="none"><path d="M4 9.5c-1.4 0-2.5-1.1-2.5-2.5S2.6 4.5 4 4.5c.3-1.7 1.9-3 3.9-3S11.5 2.8 11.8 4.5c1.4 0 2.6 1.1 2.6 2.5s-1.1 2.5-2.4 2.5V14H4V9.5Z" fill="#FFFFFF"/><path d="M4 11.5h8" stroke="#D24D29" stroke-width="1.2"/></svg></span>
+      InstaChef Mobile
+    </div>
+    <h1>Release Notes, Version 1.0</h1>
+    <p class="lede">All features in this build, module by module, for both the customer app and the chef app. Things that are bypassed for testing and things that need the client are listed first, and are also marked inside each module.</p>
+    <ul class="meta">
+      <li><span class="k">Version</span><span class="v">1.0 (Android build 3)</span></li>
+      <li><span class="k">Date</span><span class="v">November 6, 2026</span></li>
+      <li><span class="k">Platforms</span><span class="v">iOS and Android</span></li>
+      <li><span class="k">Environment</span><span class="v">Development / staging test build</span></li>
+      <li><span class="k">Languages</span><span class="v">English, Spanish</span></li>
+    </ul>
+    <div class="stats">
+      <a class="stat" href="#modules"><span class="n">8</span><span class="l">Modules in this release</span></a>
+      <a class="stat bypass" href="#bypasses"><span class="n">6</span><span class="l">Testing bypasses</span></a>
+      <a class="stat client" href="#client"><span class="n">6</span><span class="l">Items needed from the client</span></a>
+    </div>
+  </header>
+</div>
+
+<nav class="nav" aria-label="Sections">
+  <div class="nav-in">
+    <a class="hl-b" href="#bypasses">Testing bypasses</a>
+    <a class="hl-c" href="#client">Client dependencies</a>
+    <a href="#auth">1 Authentication</a>
+    <a href="#home">2 Home</a>
+    <a href="#booking">3 Booking</a>
+    <a href="#chat">4 Chat</a>
+    <a href="#live">5 Live Streaming</a>
+    <a href="#payments">6 Payments</a>
+    <a href="#rankings">7 Rankings</a>
+    <a href="#profile">8 Profile</a>
+  </div>
+</nav>
+
+<main class="wrap">
+
+  <!-- ===== Bypasses ===== -->
+  <section class="part" id="bypasses">
+    <header>
+      <span class="eyebrow">Before release</span>
+      <h2>Testing bypasses</h2>
+      <p>These rules are switched off or replaced for now, so the app can be tested end to end. Each one must be turned back on before client or Beta testing that should behave like production.</p>
+    </header>
+
+    <ol class="register">
+      <li class="reg">
+        <div class="reg-head"><span class="reg-id">B1</span><h3>Fixed OTP code: 0000</h3><span class="status on">On now</span></div>
+        <p>No real code is sent by SMS or email. The fixed code <code>0000</code> works everywhere a code is asked for.</p>
+        <p class="where"><b>Why:</b> the Twilio (SMS) and SMTP (email) accounts are not set up yet. See <a href="#d3">D3</a> and <a href="#d4">D4</a>.</p>
+        <p class="where"><b>Where:</b> Signup OTP verification, Login with an unverified email, Forgot / Reset Password, changing email or phone in Personal Information.</p>
+      </li>
+      <li class="reg">
+        <div class="reg-head"><span class="reg-id">B2</span><h3>Chef approval</h3><span class="status on">On now</span></div>
+        <ul>
+          <li>A chef who finishes all 9 onboarding sections is treated as approved. Customers can find the chef in search, open the profile, see the slots and book.</li>
+          <li>The usual booking checks are skipped: approved documents, insurance, connected bank, accepted Chef Agreement, and a plan that is not Restricted or Suspended.</li>
+          <li>The chef still shows as "waiting for approval" in Super Admin, and the free trial does not start.</li>
+        </ul>
+        <p class="where"><b>Why:</b> the admin panel is not complete yet. See <a href="#i1">I1</a>.</p>
+        <p class="where"><b>Where:</b> Authentication 6 l (Profile Submitted), Live Streaming 3 (Go Live Hub), Profile 15 (Manage Subscription).</p>
+      </li>
+      <li class="reg">
+        <div class="reg-head"><span class="reg-id">B3</span><h3>Gold plan for every chef</h3><span class="status on">On now</span></div>
+        <ul>
+          <li>Every chef can use Go Live and appears in Featured Chefs.</li>
+          <li>The subscription screen shows Live Feed and Featured as unlocked.</li>
+          <li>The plan name and status shown are still the real ones.</li>
+        </ul>
+        <p class="where"><b>Why:</b> the subscription flow is not built yet. See <a href="#d1">D1</a>.</p>
+        <p class="where"><b>Where:</b> Home 1 (Featured Chefs), Live Streaming 4 (Gold Plan), Profile 15 (Manage Subscription).</p>
+      </li>
+      <li class="reg">
+        <div class="reg-head"><span class="reg-id">B4</span><h3>No 48-hour booking notice</h3><span class="status on">On now</span></div>
+        <p>Normally a session must be booked at least 48 hours ahead and same-day booking is not allowed. For now, customers can book, reschedule or book a replacement chef for any time from now. A time that has already passed is still refused.</p>
+        <p class="where"><b>Where:</b> Booking 1 (Book a Chef), 10 (Reschedule), 11 (Book Another Chef).</p>
+      </li>
+      <li class="reg">
+        <div class="reg-head"><span class="reg-id">B5</span><h3>Rankings include bypass-approved chefs</h3><span class="status next">Next backend release</span></div>
+        <ul>
+          <li>Chefs approved through B2 will appear in weekly and monthly rankings, Chef of the Year and the leaderboard.</li>
+          <li>Chefs on a Restricted or Suspended plan will no longer be left out.</li>
+          <li>Suspended or deactivated accounts and chefs with an open dispute are still left out.</li>
+          <li>Rankings already finalised keep the chefs they had. A week or month that finalises while the bypass is on keeps those chefs in its saved ranking.</li>
+        </ul>
+        <p class="where"><b>Where:</b> Rankings &amp; Rewards (whole module).</p>
+      </li>
+      <li class="reg">
+        <div class="reg-head"><span class="reg-id">B6</span><h3>Stripe in test mode</h3><span class="status on">On now</span></div>
+        <p>All card payments, refunds and payouts run in Stripe test mode, so no real money moves. The connected Stripe account is our own development account.</p>
+        <p class="where"><b>Why:</b> the client's Stripe account is not connected yet. See <a href="#d6">D6</a>.</p>
+        <p class="where"><b>Where:</b> Booking (card hold and charges), Payments &amp; Payouts (whole module).</p>
+      </li>
+    </ol>
+
+    <div class="two">
+      <div class="panel">
+        <h3>How the backend switch works</h3>
+        <ul>
+          <li>B2 to B5 are controlled by one server switch, <code>TEST_BYPASS</code>.</li>
+          <li>Turn on: set <code>TEST_BYPASS=1</code> in the server <code>.env</code> and restart the API and worker. Turn off: set it to <code>0</code> and restart.</li>
+          <li>It works only on local, development and staging. Production ignores it.</li>
+          <li>The dev server has it deployed and turned on.</li>
+        </ul>
+      </div>
+      <div class="panel">
+        <h3>What the bypass does not change</h3>
+        <ul>
+          <li>Chef payouts still need a connected bank account.</li>
+          <li>Card payments, refunds and charges work as normal (in Stripe test mode).</li>
+          <li>No API, request or response format has changed, so the apps need no update when it is switched.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== Client dependencies ===== -->
+  <section class="part" id="client">
+    <header>
+      <span class="eyebrow">Before release</span>
+      <h2>Client dependencies</h2>
+      <p>These items need a decision, an account or a key from the client. Until they arrive, the features listed under each one can only be tested with the bypasses above, or not at all.</p>
+    </header>
+
+    <ol class="register">
+      <li class="reg client" id="d1">
+        <div class="reg-head"><span class="reg-id">D1</span><h3>Subscription payment method</h3><span class="status need">Decision needed</span></div>
+        <p>The client needs to decide whether chef subscriptions (Silver and Gold) are paid through In-App Purchase (Apple / Google) or through Stripe. The subscription flow will be built once this is confirmed.</p>
+        <p class="where"><b>Blocked until then:</b> buying, changing or cancelling a plan, the free trial, renewals and failed renewal payments, Restricted / Suspended states, the Gold upgrade for Live Feed, and chef referral rewards (free month).</p>
+      </li>
+      <li class="reg client" id="d2">
+        <div class="reg-head"><span class="reg-id">D2</span><h3>Apple and Google developer accounts</h3><span class="status need">Needed if In-App Purchase</span></div>
+        <p>If In-App Purchase is chosen in D1, the client's Apple Developer (App Store Connect) and Google Play Console accounts are needed to create the subscription products and test purchases.</p>
+      </li>
+      <li class="reg client" id="d3">
+        <div class="reg-head"><span class="reg-id">D3</span><h3>Twilio account</h3><span class="status need">Account needed</span></div>
+        <p>Needed to send OTP codes by SMS. Until then the fixed code from B1 is used.</p>
+      </li>
+      <li class="reg client" id="d4">
+        <div class="reg-head"><span class="reg-id">D4</span><h3>SMTP (email) account</h3><span class="status need">Account needed</span></div>
+        <p>Needed to send OTP codes and other emails by email. Until then the fixed code from B1 is used.</p>
+      </li>
+      <li class="reg client" id="d5">
+        <div class="reg-head"><span class="reg-id">D5</span><h3>Google Maps API key</h3><span class="status need">Key needed</span></div>
+        <p>A Google Maps and Places API key from the client's Google Cloud account is needed for release.</p>
+        <p class="where"><b>Used by:</b> chef Work Location and Service Location, booking service address, address search, map pickers, and the location for nearby chefs and live streams.</p>
+      </li>
+      <li class="reg client" id="d6">
+        <div class="reg-head"><span class="reg-id">D6</span><h3>Client's Stripe account (live mode)</h3><span class="status need">Account needed</span></div>
+        <p>The client's own Stripe account and live keys are needed before release, for customer card payments and chef payouts through Stripe Connect. Until then everything runs on our test account (B6).</p>
+      </li>
+      <li class="reg internal" id="i1">
+        <div class="reg-head"><span class="reg-id">I1</span><h3>Admin panel (our side)</h3><span class="status">In progress</span></div>
+        <p>Not a client item. The admin panel is not complete yet, so chef approval is bypassed (B2). Once it is ready, customers will see a chef only after the admin approves that chef's account.</p>
+      </li>
+    </ol>
+  </section>
+
+  <div id="modules"></div>
+
+  <!-- ===== 1 Authentication ===== -->
+  <section class="module" id="auth">
+    <header class="mod-head">
+      <span class="eyebrow">Module 1</span>
+      <h2>Authentication</h2>
+      <p>Getting into the app: intro, role selection, login, signup, OTP, chef onboarding, password reset and logout.</p>
+    </header>
+    <ol class="feats">
+      <li class="feat"><h3>Intro Screens</h3><ul>
+        <li>Three intro slides explaining the app for chefs and customers</li>
+        <li>"Get Started" and "Sign in" options for new and returning users</li></ul></li>
+      <li class="feat"><h3>Role Selection</h3><ul>
+        <li>Users choose "Need A Chef" (Customer) or "I am a Chef" before signing up</li></ul></li>
+      <li class="feat"><h3>Login</h3><ul>
+        <li>Login with email and password</li>
+        <li>Continue with Google</li>
+        <li>Users with an unverified email are taken to OTP Verification</li></ul></li>
+      <li class="feat"><h3>Signup</h3><ul>
+        <li>Register with first name, last name, email, phone number and password</li>
+        <li>Password must be at least 8 characters, with a confirm password field</li>
+        <li>Optional referral code at signup</li>
+        <li>Terms of Service must be accepted to register</li></ul></li>
+      <li class="feat"><h3>OTP Verification</h3><ul>
+        <li>OTP Verification screen with a Resend Code option and countdown timer</li></ul>
+        <div class="note"><span class="tag">Test bypass <a href="#bypasses">B1</a></span>The OTP is a fixed code (0000) for now, because the Twilio (SMS) and SMTP (email) accounts are not set up yet. Real codes will be sent once they are connected.</div></li>
+      <li class="feat"><h3>Chef Onboarding (Profile Setup)</h3>
+        <ol class="steps">
+          <li><span><b>Chef Profile:</b> profile photo, first name, last name, username and bio</span></li>
+          <li><span><b>Cuisine &amp; Specialties:</b> choose a cuisine and one or more specialties</span></li>
+          <li><span><b>Experience:</b> years of experience, professional experience, and previous experience (restaurant, designation, start/end date, short description)</span></li>
+          <li><span><b>Services Detail:</b> add services with a category, service and hourly rate; more than one service can be added</span></li>
+          <li><span><b>Work Location:</b> search for an address, pick a spot on the map, or use the current location; customers find chefs by distance from this location</span></li>
+          <li><span><b>Availability:</b> working days and time slots in 30-minute steps, copy one day's slots to all days, checks for overlapping or invalid slots</span></li>
+          <li><span><b>Projects / Portfolio:</b> project title, description and up to 4 images</span></li>
+          <li><span><b>Documents:</b> upload Photo ID, Culinary Diploma, Food Safety Manager Certificate and Insurance Policies, with status (Uploaded / Approved / Rejected) and re-upload for rejected ones</span></li>
+          <li><span><b>Insurance:</b> answer questions (drives to bookings, has employees, serves alcohol) to see which insurance is required, then upload certificates with expiry dates</span></li>
+          <li><span><b>Policies &amp; Chef Agreement:</b> review and accept the Chef Agreement, Customer Terms, Food Safety, Refund and Insurance policies</span></li>
+          <li><span><b>Payout Setup (Stripe Connect):</b> connect a bank account to get paid weekly, with payout status (Not set up / Incomplete / In review / Active)</span></li>
+          <li><span><b>Profile Submitted:</b> confirmation screen after the chef submits the profile</span>
+            <div class="note"><span class="tag">Test bypass <a href="#bypasses">B2</a></span>Admin approval is bypassed for now, for testing only, because the admin panel is not complete yet. The chef's profile goes live straight away. Once the admin panel is ready, customers will see a chef only after the admin approves that chef's account.</div></li>
+        </ol>
+        <ul style="margin-top:8px"><li>If the chef leaves partway, the app reopens at the first step they haven't finished</li></ul></li>
+      <li class="feat"><h3>Forgot / Reset Password</h3><ul>
+        <li>Users enter their email to start a password reset</li>
+        <li>Users verify the OTP and then set a new password</li></ul>
+        <div class="note"><span class="tag">Test bypass <a href="#bypasses">B1</a></span>No code is sent here either. The same fixed OTP (0000) is used until Twilio and SMTP are set up.</div></li>
+      <li class="feat"><h3>Terms of Service</h3><ul>
+        <li>Terms screen shows the current version and its effective date</li></ul></li>
+      <li class="feat"><h3>Logout</h3><ul>
+        <li>Users can sign out securely from the app</li></ul></li>
+    </ol>
+  </section>
+
+  <!-- ===== 2 Home ===== -->
+  <section class="module" id="home">
+    <header class="mod-head">
+      <span class="eyebrow">Module 2</span>
+      <h2>Home &amp; Chef Discovery</h2>
+      <p>Finding a chef as a customer, and the chef's own home screen.</p>
+    </header>
+    <div class="side">Customer side</div>
+    <ol class="feats">
+      <li class="feat"><h3>Home</h3><ul>
+        <li>Search bar to find chefs</li>
+        <li>Category chips to browse chefs by category</li>
+        <li>Featured Chefs section (top-rated chefs)</li>
+        <li>"Live Near By You" section showing chefs who are streaming nearby</li>
+        <li>All Chefs list</li>
+        <li>Add or remove chefs from Favorites from the Home screen</li>
+        <li>Asks for location access to filter chefs by distance</li></ul>
+        <div class="note"><span class="tag">Test bypass <a href="#bypasses">B3</a></span>Every chef currently gets Gold features, so all chefs show in Featured Chefs, not only top-rated ones.</div></li>
+      <li class="feat"><h3>Filters</h3><ul>
+        <li>Filter chefs by distance (miles), cuisine, rating and experience level</li></ul></li>
+      <li class="feat"><h3>Search Results</h3><ul>
+        <li>Search chefs by name, with the selected filters applied</li></ul></li>
+      <li class="feat"><h3>Categories &amp; Top Chefs</h3><ul>
+        <li>View all categories and the top chefs in each category</li></ul></li>
+      <li class="feat"><h3>Chef Profile</h3><ul>
+        <li>About, cuisine and expertise, performance level and completed bookings</li>
+        <li>Price (hourly rate) and operational timings (working days and hours)</li>
+        <li>Live badge when the chef is currently streaming</li>
+        <li>Reviews section</li>
+        <li>"Not taking bookings right now" message when a chef can't be booked</li></ul></li>
+      <li class="feat"><h3>Chef Reviews</h3><ul>
+        <li>All reviews for a chef, with a filter by rating</li></ul></li>
+      <li class="feat"><h3>Favorites</h3><ul>
+        <li>List of all favorite chefs</li></ul></li>
+      <li class="feat"><h3>Notifications</h3><ul>
+        <li>All / Unread filter, grouped by Today and Yesterday</li>
+        <li>Mark as read</li>
+        <li>Tapping a notification opens the related screen</li></ul></li>
+    </ol>
+    <div class="side">Chef side</div>
+    <ol class="feats">
+      <li class="feat"><h3>Chef Home</h3><ul>
+        <li>Subscription banner: free trial days left, trial ended, payment failed / account suspended, or plan renewal / end date, with a "Manage" link</li>
+        <li>New booking requests with Accept / Decline (declining releases the customer's card hold)</li>
+        <li>Active (upcoming) jobs list</li>
+        <li>Notifications</li></ul></li>
+      <li class="feat"><h3>Profile Status Notifications</h3><ul>
+        <li>The chef gets a notification while the profile is pending review</li>
+        <li>The chef gets a notification once the profile is approved</li></ul></li>
+      <li class="feat"><h3>Report Review</h3><ul>
+        <li>Chefs can report a review (offensive, false or misleading, not about their service, personal information, spam, or other) with optional details</li></ul></li>
+    </ol>
+  </section>
+
+  <!-- ===== 3 Booking ===== -->
+  <section class="module" id="booking">
+    <header class="mod-head">
+      <span class="eyebrow">Module 3</span>
+      <h2>Booking &amp; Sessions</h2>
+      <p>Booking a chef, one-off and recurring sessions, changes, cancellations, no-shows, exceptions and disputes. The numbers below (48 hours, 14 days, 24 hours, 10%, 7 days, 30 minutes, 3 retries) are the current settings and can be changed by the admin.</p>
+    </header>
+    <div class="side">Customer side</div>
+    <ol class="feats">
+      <li class="feat"><h3>Book a Chef</h3><ul>
+        <li>Select a date and an available time slot (in the chef's local time)</li>
+        <li>Sessions are at least 60 minutes long</li>
+        <li>Number of guests and service address (search or pick on map)</li>
+        <li>Repeat booking: One-Off, Weekly, Every 2 weeks or Monthly, ending after a number of sessions or on a chosen date</li>
+        <li>Dietary needs and special requests</li>
+        <li>Select a saved card or add a new card (Stripe)</li>
+        <li>Price breakdown: chef fee, taxes and total per session</li></ul>
+        <div class="note"><span class="tag">Test bypass <a href="#bypasses">B4</a></span>Normally a booking must be made at least 48 hours before the session, and same-day booking is not allowed. This rule is bypassed for now so testing is easier; same-day bookings can be made. It will be turned back on before release.</div></li>
+      <li class="feat"><h3>Booking Summary</h3><ul>
+        <li>Review all details before sending the request</li>
+        <li>Shows which repeat sessions are available or unavailable (chef's day off, outside the chef's hours, chef already booked)</li>
+        <li>Option to use referral credit</li>
+        <li>Shows the free cancellation date and refund policy</li>
+        <li>The card is only put on hold, not charged. A one-off booking is charged when the chef accepts; a series is charged 7 days before each session</li>
+        <li>The chef has 24 hours to answer</li></ul></li>
+      <li class="feat"><h3>Booking Request Sent</h3><ul>
+        <li>Confirmation screen with a "View My Bookings" button</li></ul></li>
+      <li class="feat"><h3>My Bookings</h3><ul>
+        <li>Tabs: New, Active and Completed</li>
+        <li>Status badges: Awaiting Chef, Confirmed, In Progress, Completed, Declined by chef, Cancelled, Expired, Refunded</li>
+        <li>Payment status on each booking: card on hold, to be charged on a date, charged, payment retrying, payment failed</li></ul></li>
+      <li class="feat"><h3>Booking Detail</h3><ul>
+        <li>Service date and time, shift, notes, charges per session and payment card</li>
+        <li>Free cancellation date (or the date it ended)</li>
+        <li>Change the payment card for later charges</li>
+        <li>"Your chef arrived" banner once the chef checks in</li>
+        <li>Cancel a pending request (the card hold is released, nothing is charged)</li>
+        <li>Book Again and Rate Now after the session</li></ul></li>
+      <li class="feat"><h3>Recurring Series (All Sessions)</h3><ul>
+        <li>Session timeline with each session's status: Scheduled, Confirmed, Completed, Skipped, Cancelled, Paused, Chef Unavailable, Payment Failed, Replacement Pending, Replaced</li>
+        <li>Pause Series: sessions more than 14 days away are paused and not charged; sessions inside 14 days still go ahead</li>
+        <li>Resume Series: paused sessions come back if the chef is still free at those times</li>
+        <li>Cancel all Remaining sessions (completed and skipped sessions are not affected)</li></ul></li>
+      <li class="feat"><h3>Skip a Session</h3><ul>
+        <li>Skip one session in a series; the rest of the series stays the same</li>
+        <li>More than 14 days away: nothing is charged, or the amount is refunded</li>
+        <li>Inside 14 days: charged with no refund</li>
+        <li>Any referral credit used goes back to the balance</li></ul></li>
+      <li class="feat"><h3>Cancel a Session / Booking</h3><ul>
+        <li>Shows how many days before the session the customer is cancelling</li>
+        <li>More than 14 days ahead: refund of the amount paid, less the 10% platform commission (or nothing charged if not charged yet)</li>
+        <li>Inside 14 days: no refund, and the chef is paid on the session date</li>
+        <li>Shows whether other sessions in the series are affected</li>
+        <li>Referral credit goes back to the balance</li></ul></li>
+      <li class="feat"><h3>Request an Exception</h3><ul>
+        <li>For cancellations inside the 14-day window when something serious happened (emergency, severe weather, serious illness, safety issue, problem with the app, or something else)</li>
+        <li>Add details and submit the request</li>
+        <li>Exception Status screen: Submitted, Under review, then Approved or Rejected, with the team's note</li>
+        <li>If approved: refund of the booking amount less the 10% commission</li>
+        <li>Decision usually within 2 business days, with a push and email</li></ul></li>
+      <li class="feat"><h3>Reschedule a Session (Request a New Time)</h3><ul>
+        <li>Pick a new date and time from the chef's free slots</li>
+        <li>14 or more days away: the session moves right away if the time is free</li>
+        <li>Inside 14 days: the session moves only if the chef accepts</li>
+        <li>Only this session moves; other sessions stay the same</li>
+        <li>Results shown: waiting for the chef, new time declined, request withdrawn, or request expired (the original time is kept)</li></ul>
+        <div class="note"><span class="tag">Test bypass <a href="#bypasses">B4</a></span>The 48-hour notice rule is bypassed for testing here too, so a session can be moved to any time from now. A time that has already passed is still refused.</div></li>
+      <li class="feat"><h3>Chef Can't Make It (Book Another Chef)</h3><ul>
+        <li>When the chef marks a session unavailable, the customer is alerted</li>
+        <li>Shows the chefs available for that date and time</li>
+        <li>Choose another chef as a replacement, or cancel just that session for a full refund (commission included)</li>
+        <li>Replacement status: requested, waiting for the new chef, confirmed, done by the new chef, or declined / not answered (book another chef or cancel)</li>
+        <li>Other sessions in the series are not affected</li></ul>
+        <div class="note"><span class="tag">Test bypass <a href="#bypasses">B4</a></span>Normally a replacement chef can't be booked if the session is less than 48 hours away. This rule is bypassed for now for testing, so a replacement chef can be booked even for a same-day session. It will be turned back on before release.</div></li>
+      <li class="feat"><h3>Chef Didn't Arrive (No-Show Report)</h3><ul>
+        <li>If the chef hasn't checked in, the customer can report a no-show after the session start time</li>
+        <li>The report can be made until the session ends</li>
+        <li>The team reviews it; if confirmed, the customer gets back the amount paid less the 10% commission</li></ul></li>
+      <li class="feat"><h3>Payment Failed</h3><ul>
+        <li>If the card can't be charged for a session, it is retried up to 3 times</li>
+        <li>The customer can update the card to pay right away</li>
+        <li>If all attempts fail, that session is cancelled and the chef's time is released; other sessions continue</li>
+        <li>Option to book the same chef again</li></ul></li>
+      <li class="feat"><h3>Rate &amp; Review</h3><ul>
+        <li>Star rating and written review after a completed session</li>
+        <li>For a series, a review is asked for after the first session</li></ul></li>
+    </ol>
+    <div class="side">Chef side</div>
+    <ol class="feats">
+      <li class="feat"><h3>Bookings</h3><ul>
+        <li>Tabs: New, Active and Completed</li></ul></li>
+      <li class="feat"><h3>New Booking Request</h3><ul>
+        <li>Customer, date, time, address, special requests and what the chef earns</li>
+        <li>Recurring requests show the repeat rule and the number of sessions</li>
+        <li>Accept (one-off) or "Accept all sessions" (series)</li>
+        <li>Decline (the customer's card hold is released)</li>
+        <li>Requests not answered within 24 hours expire and count as declines</li>
+        <li>Response time counts toward the chef's ranking</li></ul></li>
+      <li class="feat"><h3>Booking Review (Job Detail)</h3><ul>
+        <li>Service details, date and time, series summary and customer details</li>
+        <li>The customer's email and phone are hidden; chat in the app instead</li>
+        <li>Payment details: booking amount, commission (10%) and what the chef earns</li>
+        <li>Reschedule requests from the customer appear here</li></ul></li>
+      <li class="feat"><h3>Reschedule Request</h3><ul>
+        <li>Shows the old and new time</li>
+        <li>Accept the new time or decline it (for sessions inside 14 days)</li></ul></li>
+      <li class="feat"><h3>Today's Jobs</h3><ul>
+        <li>"I've Arrived - Check In" button, available from the session's check-in time; the arrival time is recorded</li>
+        <li>Mark Job Completed; the end time is recorded</li>
+        <li>Report a customer no-show if the customer is not there 30 minutes after the start</li></ul></li>
+      <li class="feat"><h3>Customer No-Show Report</h3><ul>
+        <li>The chef describes what happened and submits the report</li>
+        <li>If confirmed, it counts as a late cancellation: the chef is paid on the session date and loses no points</li></ul></li>
+      <li class="feat"><h3>Job Completed</h3><ul>
+        <li>Shows the recorded end time and what the chef earns</li>
+        <li>Rate the customer (only the InstaChef team sees this rating) with an optional private note</li></ul></li>
+      <li class="feat"><h3>Mark Session Unavailable</h3><ul>
+        <li>The chef marks one session in a series as unavailable, with a reason</li>
+        <li>Only this session is affected; the customer books another chef or cancels that session</li>
+        <li>Costs the chef 10 points</li></ul></li>
+      <li class="feat"><h3>Cancel Booking (Chef)</h3><ul>
+        <li>The chef picks a reason (personal emergency, safety concern, scheduling conflict, client unavailable, unable to complete the service, other) and adds details</li>
+        <li>The customer gets a full refund</li>
+        <li>Costs the chef 10 points per cancelled session (no points if no upcoming session is left)</li></ul></li>
+    </ol>
+    <div class="side">Both sides</div>
+    <ol class="feats">
+      <li class="feat"><h3>Disputes</h3><ul>
+        <li>Open a dispute up to 72 hours after the session ends, with the session, a subject and a description</li>
+        <li>A chef reported as a no-show can send their side before a decision</li>
+        <li>Dispute detail: who opened it, date, status, decision (no refund, partial refund, full refund) and the note from InstaChef</li>
+        <li>Disputes can be followed in Help &amp; Support → My Requests; replies come by email</li></ul></li>
+    </ol>
+  </section>
+
+  <!-- ===== 4 Chat ===== -->
+  <section class="module" id="chat">
+    <header class="mod-head">
+      <span class="eyebrow">Module 4</span>
+      <h2>Messages / Chat</h2>
+      <p>Real-time chat between customer and chef. Each booking has its own chat.</p>
+    </header>
+    <ol class="feats">
+      <li class="feat"><h3>Messages (Inbox)</h3><ul>
+        <li>List of all conversations, one chat per booking</li>
+        <li>Each row shows the other person's name and photo, last message and unread count</li>
+        <li>Chat status badge: Locked, Active booking or Completed</li>
+        <li>The list updates in real time when a new message arrives or a chat's status changes</li></ul></li>
+      <li class="feat"><h3>Chat Lock / Unlock Rules</h3><ul>
+        <li>The chat is locked until the booking is confirmed</li>
+        <li>Customer sees: "Chat opens when your booking is confirmed"</li>
+        <li>Chef sees: "Chat opens when you accept this booking"</li>
+        <li>The chat opens automatically once the chef accepts the booking</li>
+        <li>After the booking is completed, the chat becomes read-only: old messages can be read but new ones can't be sent</li></ul></li>
+      <li class="feat"><h3>Chat Screen</h3><ul>
+        <li>Real-time messaging between the customer and the chef</li>
+        <li>Shows a "Booking confirmed · date" header for the booking</li>
+        <li>"Seen" read receipt under the latest message once the other person reads it</li>
+        <li>Older messages load as the user scrolls up</li>
+        <li>If a message fails to send, it shows "Not sent · Tap to retry"</li>
+        <li>Empty chat shows "No messages yet. Say hello!"</li>
+        <li>Chat can also be opened from the booking detail screen</li></ul></li>
+      <li class="feat"><h3>Safety &amp; Privacy</h3><ul>
+        <li>Phone numbers, emails and outside payment links are hidden in messages</li>
+        <li>A warning in the chat explains this, and repeated attempts are flagged to the InstaChef team</li>
+        <li>The customer's email and phone are not shown to the chef; all contact happens through in-app chat</li>
+        <li>Messages are removed after 2 years</li></ul></li>
+    </ol>
+  </section>
+
+  <!-- ===== 5 Live ===== -->
+  <section class="module" id="live">
+    <header class="mod-head">
+      <span class="eyebrow">Module 5</span>
+      <h2>Live Streaming</h2>
+      <p>Chefs stream live to customers nearby; customers watch, chat and book from the stream.</p>
+    </header>
+    <div class="side">Customer side</div>
+    <ol class="feats">
+      <li class="feat"><h3>Live (Nearby Streams)</h3><ul>
+        <li>List of chefs who are live near the customer, with distance and viewer count</li>
+        <li>Uses the current location, or the customer can enter an address or pick a spot on the map</li>
+        <li>Shows streams within 1 km of the selected location</li>
+        <li>Asks for location access, with a manual address option if it is denied</li>
+        <li>"No live streams nearby" when nobody is streaming</li></ul></li>
+      <li class="feat"><h3>Watch Live</h3><ul>
+        <li>Watch a chef's live video, with a LIVE badge and live viewer count</li>
+        <li>Live chat with the chef and other viewers, with "Tap to mention"</li>
+        <li>"Book This Chef" button during the stream</li>
+        <li>Hide / show chat, and swipe left to hide everything on screen</li>
+        <li>Reconnects automatically if the chef's video stops</li>
+        <li>Shows a message when the stream has ended</li>
+        <li>Contact details are hidden in live chat</li></ul></li>
+    </ol>
+    <div class="side">Chef side</div>
+    <ol class="feats">
+      <li class="feat"><h3>Live (Go Live Hub)</h3><ul>
+        <li>"Go Live Now" button and current plan status</li>
+        <li>"Return to Live Stream" if a stream is already running</li>
+        <li>Going live needs an account that can take bookings (approved documents, insurance, agreement and bank account) and a service location</li></ul>
+        <div class="note"><span class="tag">Test bypass <a href="#bypasses">B2</a></span>The account checks (documents, insurance, agreement, bank account) are skipped for chefs who finished onboarding.</div></li>
+      <li class="feat"><h3>Live Upgrade (Gold Plan)</h3><ul>
+        <li>Live Feed is a Gold plan feature</li>
+        <li>Chefs without Gold see an "Upgrade to Gold" screen</li>
+        <li>Subscription Details screen: subscription fee, tax, total and promo code</li></ul>
+        <div class="note"><span class="tag">Test bypass <a href="#bypasses">B3</a></span>For now, every chef who completes their profile becomes a Gold chef automatically, so Live Streaming can be tested.</div>
+        <div class="note client"><span class="tag">Client dependency <a href="#d1">D1</a></span>The Gold upgrade (subscription payment) flow is not built yet, because the client hasn't decided whether subscriptions will use In-App Purchase (Apple / Google) or Stripe. It will be built once the client confirms, and then only chefs on the Gold plan will be able to go live.</div></li>
+      <li class="feat"><h3>Go Live</h3><ul>
+        <li>Enter a stream title and start the live stream</li>
+        <li>Asks for camera and microphone permission</li>
+        <li>Customers near the chef can watch; streams are not recorded</li></ul></li>
+      <li class="feat"><h3>Live Stream (Broadcasting)</h3><ul>
+        <li>Status: Connecting, LIVE, Reconnecting, Ending</li>
+        <li>Live viewer count</li>
+        <li>Controls: Flip camera, Mute / Unmute, Camera on / off</li>
+        <li>Reply to viewers in live chat</li>
+        <li>Weak connection and connection lost warnings</li>
+        <li>Shows who can watch: customers within 1 km, up to 1,000 viewers, not recorded</li>
+        <li>The stream stops when the app goes to the background and reconnects when the chef comes back</li>
+        <li>End Stream with a confirmation</li></ul></li>
+      <li class="feat"><h3>Stream Ended</h3><ul>
+        <li>Stream stats: duration, peak viewers and booking requests from the stream</li>
+        <li>No replay, since streams are not recorded</li>
+        <li>A stream ends on its own if:
+          <ul>
+            <li>it didn't start within 15 minutes</li>
+            <li>the Gold plan is no longer active</li>
+            <li>the account can't take bookings</li>
+            <li>it ran for the 4-hour maximum</li>
+            <li>no video was received for 10 minutes</li>
+            <li>a new stream was started</li>
+          </ul></li></ul></li>
+    </ol>
+  </section>
+
+  <!-- ===== 6 Payments ===== -->
+  <section class="module" id="payments">
+    <header class="mod-head">
+      <span class="eyebrow">Module 6</span>
+      <h2>Payments &amp; Payouts</h2>
+      <p>Customer cards and charges, and chef earnings, payouts, receipts and refunds.</p>
+    </header>
+    <div class="note mod-note"><span class="tag">Test bypass <a href="#bypasses">B6</a> · Client dependency <a href="#d6">D6</a></span>Stripe is in test mode, so no real payments are made. The Stripe account connected now is our own (development) account. Before release it must be switched to the client's own Stripe account in live mode.</div>
+    <div class="side">Customer side</div>
+    <ol class="feats">
+      <li class="feat"><h3>Manage Payment (Saved Cards)</h3><ul>
+        <li>List of saved cards with the card brand, type (credit / debit / prepaid) and last 4 digits</li>
+        <li>Add a new card through Stripe (name on card and card details)</li>
+        <li>Remove a card with a confirmation</li></ul></li>
+      <li class="feat"><h3>Card Declined</h3><ul>
+        <li>Shown when a card is declined while booking; nothing is charged</li>
+        <li>Options: Try Again or Use Another Card</li></ul></li>
+      <li class="feat"><h3>Update Card After a Failed Session Payment</h3><ul>
+        <li>When the customer saves a new card for a failed session, the result is shown: session paid, declined again, or session cancelled</li>
+        <li>Later sessions are charged to the new card</li></ul></li>
+    </ol>
+    <div class="side">Chef side</div>
+    <ol class="feats">
+      <li class="feat"><h3>Payouts</h3><ul>
+        <li>Earnings summary: pending (sessions not yet held), on hold (open report or refund) and next payout date</li>
+        <li>Paid automatically to the chef's bank every week</li>
+        <li>Filters: All, Pending, Paid and Refunded</li>
+        <li>Each item shows its status: Pending, Scheduled, Held or Paid</li>
+        <li>Items on hold show why: no-show report open or refund in progress</li></ul></li>
+      <li class="feat"><h3>Transaction Detail</h3><ul>
+        <li>Booking amount, card fee, commission (10%), refund and the chef's payout</li>
+        <li>Payment status, payout status and payout date</li>
+        <li>Customer details (email and phone are hidden; use in-app chat)</li>
+        <li>Cancellation type when relevant: late cancellation by the customer, customer no-show or approved exception</li></ul></li>
+      <li class="feat"><h3>Payout History</h3><ul>
+        <li>Weekly payouts with the date and the number of sessions</li>
+        <li>Status: Paid, On its way to the bank, or Failed</li>
+        <li>Shows the bank and its last 4 digits, and when the money arrived</li>
+        <li>If the bank rejects a payout, it is sent again with the next payout</li></ul></li>
+      <li class="feat"><h3>More Options</h3><ul>
+        <li>My Receipt, Payout Account (Stripe), and Refund &amp; Dispute</li></ul></li>
+      <li class="feat"><h3>My Receipts</h3><ul>
+        <li>List of receipts with the receipt number, booking ID, date and time</li>
+        <li>Tap a receipt to see the transaction detail</li></ul></li>
+      <li class="feat"><h3>Refund &amp; Dispute</h3><ul>
+        <li>List of refunded bookings with the booking amount and the chef's payout</li>
+        <li>Refund reasons: chef cancelled, chef no-show, chef unavailable, customer cancelled, exception, or refunded by admin</li>
+        <li>Shows whether the full amount or the amount less commission was refunded</li></ul></li>
+      <li class="feat"><h3>Payout Account (Stripe Connect)</h3><ul>
+        <li>Set up or manage the payout account on Stripe</li>
+        <li>Status: Not set up, Incomplete, In review, Active or Disabled, with a note on what to do next</li></ul>
+        <div class="note"><span class="tag">Test bypass <a href="#bypasses">B6</a></span>Payout accounts are connected to our test Stripe account for now, so no real money is paid out.</div>
+        <div class="note info"><span class="tag">Not bypassed</span>The test bypass does not skip the bank account. A chef still needs a connected bank account to receive payouts.</div></li>
+    </ol>
+  </section>
+
+  <!-- ===== 7 Rankings ===== -->
+  <section class="module" id="rankings">
+    <header class="mod-head">
+      <span class="eyebrow">Module 7 · Chef only</span>
+      <h2>Rankings &amp; Rewards</h2>
+      <p>Chef scores, leaderboard, performance levels, points, milestone rewards and recognition. This is its own tab in the chef app.</p>
+    </header>
+    <div class="note mod-note"><span class="tag">Test bypass <a href="#bypasses">B5</a> · next backend release</span>For testing, the backend will include chefs approved through the test bypass in weekly and monthly rankings, Chef of the Year and the leaderboard. Chefs on a Restricted or Suspended plan will also no longer be left out. Until that release, chefs approved through the bypass may not appear in rankings. Suspended or deactivated accounts and chefs with an open dispute are still left out. Rankings already finalised keep the chefs they had, and a week or month that finalises while the bypass is on keeps those chefs in its saved ranking.</div>
+    <ol class="feats">
+      <li class="feat"><h3>Rankings (Leaderboard)</h3><ul>
+        <li>Leaderboard of chefs ranked by total points</li>
+        <li>Each row shows the chef's position, points and number of bookings</li>
+        <li>The chef's own row is marked "You"</li></ul></li>
+      <li class="feat"><h3>My Ranking</h3><ul>
+        <li>Score out of 100 and the chef's position among all ranked chefs</li>
+        <li>This Week / This Month view</li>
+        <li>Score breakdown:
+          <ul>
+            <li>Customer ratings: 40%</li>
+            <li>Completed bookings: 25%</li>
+            <li>Response time: 20%</li>
+            <li>Acceptance rate: 15%</li>
+          </ul></li>
+        <li>When there is too little data for the week or month, all-time data is used (with a note explaining which part)</li>
+        <li>Provisional Ranking: new chefs without enough data get a score of 50 for that part until there is enough data</li>
+        <li>"You're not ranked" message for chefs who are not active, approved or in good standing</li></ul></li>
+      <li class="feat"><h3>Performance Level</h3><ul>
+        <li>Levels by points: Bronze (0-99), Silver (100-249), Gold (250-499), Platinum (500+)</li>
+        <li>Shows the current level, points to the next level and levels still locked</li>
+        <li>The performance level is separate from the chef's subscription plan</li></ul></li>
+      <li class="feat"><h3>Points &amp; Rewards</h3><ul>
+        <li>Current level, total points and points to the next level</li>
+        <li>Reward eligibility: Eligible or Not eligible right now</li>
+        <li>Featured placement days left (or "Not shown to customers right now")</li>
+        <li>Milestone Rewards:
+          <ul>
+            <li>Bronze: badge + recognition on profile</li>
+            <li>Silver: badge + 7 days Featured</li>
+            <li>Gold: badge + 14 days Featured</li>
+            <li>Platinum: badge + 30 days Featured</li>
+            <li>Each milestone shows Earned, points to go, or Locked</li>
+          </ul></li>
+        <li>Point History: points earned or lost for completed bookings, repeat customers, 1-5 star reviews, cancelled sessions, no-shows, adjustments by InstaChef, and reversals</li></ul></li>
+      <li class="feat"><h3>Recognition</h3><ul>
+        <li>Chef of the Week and Chef of the Month: the top eligible chef, after InstaChef approves the ranking</li>
+        <li>The badge shows on the chef's profile and in customer search until the end date</li>
+        <li>Past Recognition list</li>
+        <li>Chef of the Year: points this year, current position and Platinum reward eligibility (only chefs with the 1,000-point Platinum reward can win)</li></ul></li>
+      <li class="feat"><h3>Reward Detail (Annual Competition)</h3><ul>
+        <li>The competition runs from January 1 to December 31</li>
+        <li>The leaderboard updates throughout the year with the top chefs</li>
+        <li>Possible prizes, set by InstaChef each year: cash award, equipment, professional cookware, marketing promotion, travel experience, special InstaChef recognition</li>
+        <li>Winner: most points, then most bookings, then highest rating</li>
+        <li>Prizes are subject to separate terms</li></ul></li>
+    </ol>
+  </section>
+
+  <!-- ===== 8 Profile ===== -->
+  <section class="module" id="profile">
+    <header class="mod-head">
+      <span class="eyebrow">Module 8</span>
+      <h2>Profile &amp; Settings</h2>
+      <p>Account details, language, support, referrals and, for chefs, subscription, insurance and analytics.</p>
+    </header>
+    <div class="side">Both sides</div>
+    <ol class="feats">
+      <li class="feat"><h3>Profile</h3><ul>
+        <li>Profile menu with all account options</li>
+        <li>App version and build number shown</li>
+        <li>Logout</li></ul></li>
+      <li class="feat"><h3>Personal Information</h3><ul>
+        <li>Update first name, last name, email and phone number</li>
+        <li>A new email or phone number changes only after it is confirmed with a code</li></ul>
+        <div class="note"><span class="tag">Test bypass <a href="#bypasses">B1</a></span>The confirmation code is the fixed OTP (0000) for now, until Twilio and SMTP are set up.</div></li>
+      <li class="feat"><h3>Change Password</h3><ul>
+        <li>Enter the current password, a new password and confirm it</li></ul></li>
+      <li class="feat"><h3>Language</h3><ul>
+        <li>Switch the app between English and Spanish</li>
+        <li>App screens change language; chat messages and reviews are not translated</li></ul></li>
+      <li class="feat"><h3>Push Notifications</h3><ul>
+        <li>Turn push notifications on or off from the profile menu</li></ul></li>
+      <li class="feat"><h3>Terms &amp; Conditions and Privacy Policy</h3><ul>
+        <li>Open the latest Terms &amp; Conditions and Privacy Policy</li></ul></li>
+      <li class="feat"><h3>Help &amp; Support</h3><ul>
+        <li>FAQs tab</li>
+        <li>Support tab: send a request with name, email, topic, description and an optional file or image</li>
+        <li>Topics for customers: Booking, Payment, Refund, Account, Something else</li>
+        <li>Topics for chefs: Booking, Payment or payout, Subscription, Account &amp; verification, Something else</li>
+        <li>Contact details: support@instachef.com and www.instachef.com</li></ul></li>
+      <li class="feat"><h3>My Support Requests</h3><ul>
+        <li>List of requests with status: Submitted, Under review, Resolved</li>
+        <li>Request detail with replies from InstaChef Support and attachments</li>
+        <li>Reply to support in the request, or send a new request once it is resolved</li></ul></li>
+      <li class="feat"><h3>Deactivate My Account</h3><ul>
+        <li>Deactivate the account (hides the profile)</li>
+        <li>Request permanent data deletion</li>
+        <li>Request status: Under Review, Approved, Rejected, Completed; replies by email</li></ul></li>
+    </ol>
+    <div class="side">Customer side</div>
+    <ol class="feats">
+      <li class="feat"><h3>Manage Payment</h3><ul>
+        <li>Saved cards (see <a href="#payments">Payments &amp; Payouts</a>)</li></ul></li>
+      <li class="feat"><h3>Credits &amp; Referrals</h3><ul>
+        <li>Available referral credit and its expiry date</li>
+        <li>Credit history: earned, used at checkout, returned, expired, removed</li>
+        <li>Credit is applied at checkout; it can't be withdrawn as cash or combined with a promo code</li></ul></li>
+      <li class="feat"><h3>Refer a Friend</h3><ul>
+        <li>Share or copy a referral code</li>
+        <li>The customer gets $10 app credit when a friend completes their first booking; credit expires after 12 months</li>
+        <li>Enter a friend's referral code before the first booking request</li>
+        <li>Referral list: friends referred, qualified (first booking done) and credit earned</li></ul></li>
+    </ol>
+    <div class="side">Chef side</div>
+    <ol class="feats">
+      <li class="feat"><h3>View Public Profile</h3><ul>
+        <li>See the profile the way customers see it</li></ul></li>
+      <li class="feat"><h3>Service Location</h3><ul>
+        <li>Change the work location that customers use to find the chef</li></ul></li>
+      <li class="feat"><h3>Manage Subscription (My Plan)</h3><ul>
+        <li>Current plan, price, renewal or end date, card and billing history</li>
+        <li>Free trial status: starts after approval, trial ends, or trial ended</li>
+        <li>Restricted (trial ended with no plan) and Suspended (renewal payment failed) states, with what each one pauses</li>
+        <li>Subscription plans: Silver and Gold, monthly or yearly, with their features</li>
+        <li>Payment Failed screen for a failed renewal, with Update Payment Method</li></ul>
+        <div class="note client"><span class="tag">Client dependency <a href="#d1">D1</a></span>The subscription flow is not implemented yet, because the client hasn't decided whether subscriptions will use In-App Purchase (Apple / Google) or Stripe. Until it is built, buying or changing a plan, the free trial, renewals, failed renewal payments and the Restricted / Suspended states can't be tested.</div>
+        <div class="note"><span class="tag">Test bypass <a href="#bypasses">B3</a></span>For testing, the backend gives every chef Gold features, but the plan name and status shown are still the real ones.</div></li>
+      <li class="feat"><h3>Payout</h3><ul>
+        <li>Earnings, payouts, receipts and refunds (see <a href="#payments">Payments &amp; Payouts</a>)</li></ul></li>
+      <li class="feat"><h3>Insurance</h3><ul>
+        <li>The chef's insurance policies with their status and expiry dates</li>
+        <li>Upload a new certificate; the current one stays in force until the new one is approved</li>
+        <li>Edit policies and declarations</li></ul></li>
+      <li class="feat"><h3>Analytics</h3><ul>
+        <li>Weekly, Monthly and Lifetime view</li>
+        <li>Earnings (after fees) and the amount on hold</li>
+        <li>Revenue charts, rating and repeat customers</li>
+        <li>View Booking History</li>
+        <li>Download the report as CSV or PDF</li></ul></li>
+      <li class="feat"><h3>My Reviews</h3><ul>
+        <li>All reviews from customers, with an option to report a review</li></ul></li>
+      <li class="feat"><h3>Refer a Chef</h3><ul>
+        <li>Share or copy a referral code</li>
+        <li>When a referred chef completes their first paid month, the chef gets 1 free month of their plan (Silver or Gold)</li>
+        <li>Enter another chef's referral code before the first paid plan</li>
+        <li>Referral list: chefs referred, qualified (first paid month done) and free months earned</li></ul>
+        <div class="note client"><span class="tag">Client dependency <a href="#d1">D1</a></span>Chef referral rewards depend on a paid plan, so they can't be fully tested until the subscription flow is built.</div></li>
+    </ol>
+  </section>
+
+  <footer>
+    InstaChef Mobile · Release notes for version 1.0 (Android build 3) · November 6, 2026. Booking and payment numbers are the current admin settings and can change.
+  </footer>
+</main>
+</body>
+</html>
